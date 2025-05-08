@@ -127,87 +127,69 @@ const FlowCalculator = () => {
     // Calculate total pressure
     const pTotal = pStaticValue + pDynamic;
 
-    // Find closest data points for interpolation
-    const rpm1000Data = vetd630Data.filter(d => d.rpm === 1000);
-    const rpm1200Data = vetd630Data.filter(d => d.rpm === 1200);
-
     // Find closest points for interpolation
     const findClosestPoints = (data, targetQ) => {
       // Sort data by flow rate
       const sortedData = [...data].sort((a, b) => a.flowRate - b.flowRate);
       
-      // Find the two closest points
-      let lowerPoint = null;
-      let upperPoint = null;
-      
+      // Find the exact adjacent points
       for (let i = 0; i < sortedData.length - 1; i++) {
         if (sortedData[i].flowRate <= targetQ && sortedData[i + 1].flowRate >= targetQ) {
-          lowerPoint = sortedData[i];
-          upperPoint = sortedData[i + 1];
-          break;
+          return [sortedData[i], sortedData[i + 1]];
         }
       }
       
       // If target is outside the range, use the closest two points
-      if (!lowerPoint || !upperPoint) {
-        if (targetQ < sortedData[0].flowRate) {
-          return [sortedData[0], sortedData[1]];
-        } else {
-          return [sortedData[sortedData.length - 2], sortedData[sortedData.length - 1]];
-        }
+      if (targetQ < sortedData[0].flowRate) {
+        return [sortedData[0], sortedData[1]];
+      } else {
+        return [sortedData[sortedData.length - 2], sortedData[sortedData.length - 1]];
       }
-      
-      return [lowerPoint, upperPoint];
     };
 
-    const closest1000 = findClosestPoints(rpm1000Data, q);
-    const closest1200 = findClosestPoints(rpm1200Data, q);
-
-    // Calculate closest RPM based on flow rate
-    const calculateClosestRPM = (flowRate) => {
-      // Find average flow rate for each RPM
-      const avgFlow1000 = rpm1000Data.reduce((sum, point) => sum + point.flowRate, 0) / rpm1000Data.length;
-      const avgFlow1200 = rpm1200Data.reduce((sum, point) => sum + point.flowRate, 0) / rpm1200Data.length;
-      
-      // Calculate which RPM's average flow rate is closer to the input flow rate
-      const distanceTo1000 = Math.abs(flowRate - avgFlow1000);
-      const distanceTo1200 = Math.abs(flowRate - avgFlow1200);
-      
-      return distanceTo1000 < distanceTo1200 ? 1000 : 1200;
-    };
-
-    const closestRPM = calculateClosestRPM(q);
+    // Get all data points for the current RPM
+    const currentRPM = q >= 2.1 ? 1200 : 1000; // Choose RPM based on flow rate
+    const currentData = vetd630Data.filter(d => d.rpm === currentRPM);
+    const closestPoints = findClosestPoints(currentData, q);
 
     // Linear interpolation for efficiency
     const interpolateEfficiency = (points, targetQ) => {
       if (!points[0] || !points[1]) return null;
       
-      const [x1, x2] = [points[0].flowRate, points[1].flowRate];
-      const [y1, y2] = [points[0].efficiency, points[1].efficiency];
+      const x1 = points[0].flowRate;
+      const x2 = points[1].flowRate;
+      const y1 = points[0].efficiency;
+      const y2 = points[1].efficiency;
       
       // Ensure we don't divide by zero
       if (x2 === x1) return y1;
       
-      // Linear interpolation formula
+      // Linear interpolation formula: y = y1 + ((x - x1) * (y2 - y1)) / (x2 - x1)
       const efficiency = y1 + ((targetQ - x1) * (y2 - y1)) / (x2 - x1);
       
       // Ensure efficiency is within valid range (0-100)
       return Math.max(0, Math.min(100, efficiency));
     };
 
-    const efficiency1000 = interpolateEfficiency(closest1000, q);
-    const efficiency1200 = interpolateEfficiency(closest1200, q);
+    const efficiency = interpolateEfficiency(closestPoints, q);
 
-    // Weighted average based on RPM
-    const rpmWeight = (q - 2.1) / (3.36 - 2.1); // Normalize between RPM 1000 and 1200
-    const efficiency = efficiency1000 * (1 - rpmWeight) + efficiency1200 * rpmWeight;
+    // For debugging
+    console.log('Flow Rate:', q);
+    console.log('Current RPM:', currentRPM);
+    console.log('Closest Points:', {
+      x1: closestPoints[0].flowRate,
+      x2: closestPoints[1].flowRate,
+      y1: closestPoints[0].efficiency,
+      y2: closestPoints[1].efficiency
+    });
+    console.log('Efficiency:', efficiency);
 
     setResults({
       velocity: velocity.toFixed(2),
       pDynamic: pDynamic.toFixed(2),
       pTotal: pTotal.toFixed(2),
-      efficiency: efficiency.toFixed(2),
-      rpm: closestRPM
+      efficiency: efficiency.toFixed(3),
+      rpm: currentRPM
     });
 
     // Prepare chart data
