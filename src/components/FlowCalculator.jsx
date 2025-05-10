@@ -25,86 +25,65 @@ ChartJS.register(
 
 // VETD 630 data
 const vetd630Data = [
-  {
-    rpm: 1000,
-    flowRate: 1.75,
-    totalPressure: 120,
-    outletVelocity: 5.61393,
-    brakePower: 0.32307692,
-    efficiency: 65
-  },
-  {
-    rpm: 1000,
-    flowRate: 2.125,
-    totalPressure: 115,
-    outletVelocity: 6.81692,
-    brakePower: 0.34910714,
-    efficiency: 70
-  },
-  {
-    rpm: 1000,
-    flowRate: 2.4,
-    totalPressure: 90,
-    outletVelocity: 9.69911,
-    brakePower: 0.3,
-    efficiency: 72
-  },
-  {
-    rpm: 1000,
-    flowRate: 2.64,
-    totalPressure: 70,
-    outletVelocity: 8.46902,
-    brakePower: 0.264,
-    efficiency: 70
-  },
-  {
-    rpm: 1000,
-    flowRate: 2.8,
-    totalPressure: 50,
-    outletVelocity: 8.98229,
-    brakePower: 0.22222222,
-    efficiency: 63
-  },
-  {
-    rpm: 1200,
-    flowRate: 2.1,
-    totalPressure: 172.8,
-    outletVelocity: 6.14975219,
-    brakePower: 0.55827692,
-    efficiency: 65
-  },
-  {
-    rpm: 1200,
-    flowRate: 2.55,
-    totalPressure: 165.6,
-    outletVelocity: 7.46754171,
-    brakePower: 0.60325714,
-    efficiency: 70
-  },
-  {
-    rpm: 1200,
-    flowRate: 2.88,
-    totalPressure: 129.6,
-    outletVelocity: 8.43995844,
-    brakePower: 0.51894,
-    efficiency: 72
-  },
-  {
-    rpm: 1200,
-    flowRate: 3.168,
-    totalPressure: 100.8,
-    outletVelocity: 9.27734659,
-    brakePower: 0.456192,
-    efficiency: 70
-  },
-  {
-    rpm: 1200,
-    flowRate: 3.36,
-    totalPressure: 72,
-    outletVelocity: 9.8396047,
-    brakePower: 0.384,
-    efficiency: 63
-  }
+  { rpm: 900, flowRate: 1.27575, totalPressure: 97.2, outletVelocity: 0.190774, brakePower: 0.190773692, efficiency: 65 },
+  { rpm: 900, flowRate: 1.549125, totalPressure: 93.15, outletVelocity: 0.206144, brakePower: 0.206144277, efficiency: 70 },
+  { rpm: 900, flowRate: 1.7496, totalPressure: 72.9, outletVelocity: 0.177147, brakePower: 0.177147, efficiency: 72 },
+  { rpm: 900, flowRate: 1.92456, totalPressure: 56.7, outletVelocity: 0.155889, brakePower: 0.15588936, efficiency: 70 },
+  { rpm: 900, flowRate: 2.0412, totalPressure: 40.5, outletVelocity: 0.13122, brakePower: 0.13122, efficiency: 63 },
+
+  { rpm: 1000, flowRate: 1.75, totalPressure: 120, outletVelocity: 5.61393, brakePower: 0.323077, efficiency: 65 },
+  { rpm: 1000, flowRate: 2.125, totalPressure: 115, outletVelocity: 6.81692, brakePower: 0.349107, efficiency: 70 },
+  { rpm: 1000, flowRate: 2.4, totalPressure: 90, outletVelocity: 7.69911, brakePower: 0.3, efficiency: 72 },
+  { rpm: 1000, flowRate: 2.64, totalPressure: 70, outletVelocity: 8.46902, brakePower: 0.264, efficiency: 70 },
+  { rpm: 1000, flowRate: 2.8, totalPressure: 50, outletVelocity: 8.98229, brakePower: 0.222222, efficiency: 63 },
+
+  { rpm: 1200, flowRate: 2.1, totalPressure: 172.8, outletVelocity: 6.14975, brakePower: 0.558277, efficiency: 65 },
+  { rpm: 1200, flowRate: 2.55, totalPressure: 165.6, outletVelocity: 7.46756, brakePower: 0.603257, efficiency: 70 },
+  { rpm: 1200, flowRate: 2.88, totalPressure: 129.6, outletVelocity: 8.43395, brakePower: 0.5184, efficiency: 72 },
+  { rpm: 1200, flowRate: 3.168, totalPressure: 100.8, outletVelocity: 9.27735, brakePower: 0.456192, efficiency: 70 },
+  { rpm: 1200, flowRate: 3.36, totalPressure: 72, outletVelocity: 9.83961, brakePower: 0.384, efficiency: 63 },
+
+  { rpm: 1400, flowRate: 2.45, totalPressure: 235.2, outletVelocity: 6.64249, brakePower: 0.886523, efficiency: 65 },
+  { rpm: 1400, flowRate: 2.975, totalPressure: 225.6, outletVelocity: 8.0704, brakePower: 0.957036, efficiency: 70 },
+  { rpm: 1400, flowRate: 3.36, totalPressure: 176.4, outletVelocity: 9.109709804, brakePower: 0.8232, efficiency: 72 },
+  { rpm: 1400, flowRate: 3.696, totalPressure: 137.2, outletVelocity: 10.0206796, brakePower: 0.724416, efficiency: 70 },
+  { rpm: 1400, flowRate: 3.92, totalPressure: 98, outletVelocity: 10.62798885, brakePower: 0.609777778, efficiency: 63 },
+
+  { rpm: 1600, flowRate: 2.8, totalPressure: 307.2, outletVelocity: 7.10112217, brakePower: 1.323323077, efficiency: 65 },
+  { rpm: 1600, flowRate: 3.4, totalPressure: 294.4, outletVelocity: 8.622797531, brakePower: 1.429942857, efficiency: 70 },
+  { rpm: 1600, flowRate: 3.84, totalPressure: 230.4, outletVelocity: 9.738689422, brakePower: 1.2288, efficiency: 72 },
+  { rpm: 1600, flowRate: 4.224, totalPressure: 179.2, outletVelocity: 10.7125571, brakePower: 1.081344, efficiency: 70 },
+  { rpm: 1600, flowRate: 4.48, totalPressure: 128, outletVelocity: 11.361798, brakePower: 0.910222222, efficiency: 63 },
+
+  { rpm: 1800, flowRate: 3.15, totalPressure: 388.8, outletVelocity: 7.531877461, brakePower: 1.884184615, efficiency: 65 },
+  { rpm: 1800, flowRate: 3.825, totalPressure: 372.6, outletVelocity: 9.14585791, brakePower: 2.035992857, efficiency: 70 },
+  { rpm: 1800, flowRate: 4.32, totalPressure: 291.6, outletVelocity: 10.32944, brakePower: 1.7496, efficiency: 72 },
+  { rpm: 1800, flowRate: 4.752, totalPressure: 226.8, outletVelocity: 11.36238265, brakePower: 1.539648, efficiency: 70 },
+  { rpm: 1800, flowRate: 5.04, totalPressure: 162, outletVelocity: 12.05100662, brakePower: 1.296, efficiency: 63 },
+
+  { rpm: 2000, flowRate: 3.5, totalPressure: 480, outletVelocity: 7.939295944, brakePower: 2.584615385, efficiency: 65 },
+  { rpm: 2000, flowRate: 4.25, totalPressure: 460, outletVelocity: 9.640580718, brakePower: 2.792857143, efficiency: 70 },
+  { rpm: 2000, flowRate: 4.8, totalPressure: 360, outletVelocity: 10.88818578, brakePower: 2.4, efficiency: 72 },
+  { rpm: 2000, flowRate: 5.28, totalPressure: 280, outletVelocity: 11.97700294, brakePower: 2.112, efficiency: 70 },
+  { rpm: 2000, flowRate: 5.6, totalPressure: 200, outletVelocity: 12.70287634, brakePower: 1.777777778, efficiency: 63 },
+
+  { rpm: 2200, flowRate: 3.85, totalPressure: 580.8, outletVelocity: 8.326803835, brakePower: 3.440123077, efficiency: 65 },
+  { rpm: 2200, flowRate: 4.675, totalPressure: 556.6, outletVelocity: 10.11112636, brakePower: 3.717292857, efficiency: 70 },
+  { rpm: 2200, flowRate: 5.28, totalPressure: 435.6, outletVelocity: 11.41962559, brakePower: 3.1944, efficiency: 72 },
+  { rpm: 2200, flowRate: 5.808, totalPressure: 338.8, outletVelocity: 12.56158666, brakePower: 2.811072, efficiency: 70 },
+  { rpm: 2200, flowRate: 6.16, totalPressure: 242, outletVelocity: 13.3228891, brakePower: 2.366222222, efficiency: 63 },
+
+  { rpm: 2400, flowRate: 4.2, totalPressure: 691.2, outletVelocity: 8.697062959, brakePower: 4.466215385, efficiency: 65 },
+  { rpm: 2400, flowRate: 5.1, totalPressure: 662.4, outletVelocity: 10.56072705, brakePower: 4.826057143, efficiency: 70 },
+  { rpm: 2400, flowRate: 5.76, totalPressure: 518.4, outletVelocity: 11.92740992, brakePower: 4.1472, efficiency: 72 },
+  { rpm: 2400, flowRate: 6.336, totalPressure: 403.2, outletVelocity: 13.12014937, brakePower: 3.649536, efficiency: 70 },
+  { rpm: 2400, flowRate: 6.72, totalPressure: 288, outletVelocity: 13.91530383, brakePower: 3.072, efficiency: 63 },
+
+  { rpm: 2850, flowRate: 4.625, totalPressure: 820, outletVelocity: 9.477404636, brakePower: 5.834615385, efficiency: 65 },
+  { rpm: 2850, flowRate: 5.5, totalPressure: 725, outletVelocity: 11.5082855, brakePower: 5.696428571, efficiency: 70 },
+  { rpm: 2850, flowRate: 6.25, totalPressure: 600, outletVelocity: 12.99759363, brakePower: 5.208333333, efficiency: 72 },
+  { rpm: 2850, flowRate: 6.82, totalPressure: 470, outletVelocity: 14.2973513, brakePower: 4.579142857, efficiency: 70 },
+  { rpm: 2850, flowRate: 7.3, totalPressure: 340, outletVelocity: 15.16385079, brakePower: 3.93968254, efficiency: 63 }
 ];
 
 const FlowCalculator = () => {
@@ -112,6 +91,25 @@ const FlowCalculator = () => {
   const [pStatic, setPStatic] = useState('');
   const [results, setResults] = useState(null);
   const [chartData, setChartData] = useState(null);
+  const [staticPressureRange, setStaticPressureRange] = useState(null);
+  const [isPressureValid, setIsPressureValid] = useState(true);
+
+  // Calculate T value based on flow rate
+  const calculateT = (flowRate) => {
+    return 34.737 * Math.pow(flowRate, 2) + 24.728 * flowRate - 32.024;
+  };
+
+  // Calculate valid static pressure range
+  const calculateStaticPressureRange = (flowRate, totalPressure) => {
+    const T = calculateT(flowRate);
+    const dynamicPressure = 0.5 * 1.2 * Math.pow((4 * flowRate) / (Math.PI * Math.pow(0.63, 2)), 2);
+    const maxStaticPressure = T - dynamicPressure;
+    return {
+      min: 0, // Static pressure cannot be negative
+      max: maxStaticPressure,
+    };
+  };
+
 
   // دالة البحث عن أقرب نقطتين من أي RPM
   const findClosestPoints = (targetQ, targetTotalPressure) => {
@@ -121,57 +119,73 @@ const FlowCalculator = () => {
     });
 
     // تصنيف النقاط حسب RPM
-    const rpm1000Points = vetd630Data.filter(point => point.rpm === 1000);
-    const rpm1200Points = vetd630Data.filter(point => point.rpm === 1200);
+    const rpmPoints = {
+      900: vetd630Data.filter(point => point.rpm === 900),
+      1000: vetd630Data.filter(point => point.rpm === 1000),
+      1200: vetd630Data.filter(point => point.rpm === 1200),
+      1400: vetd630Data.filter(point => point.rpm === 1400),
+      1600: vetd630Data.filter(point => point.rpm === 1600),
+      1800: vetd630Data.filter(point => point.rpm === 1800),
+      2000: vetd630Data.filter(point => point.rpm === 2000),
+      2200: vetd630Data.filter(point => point.rpm === 2200),
+      2400: vetd630Data.filter(point => point.rpm === 2400),
+      2850: vetd630Data.filter(point => point.rpm === 2850)
+    };
 
     // البحث عن النقاط الأقرب في كل RPM
-    let lower1000 = null;
-    let higher1000 = null;
-    let lower1200 = null;
-    let higher1200 = null;
+    let closestPoints = {};
+    for (const rpm in rpmPoints) {
+      const points = rpmPoints[rpm];
+      if (points.length === 0) continue;
 
-    // البحث في RPM 1000
-    for (const point of rpm1000Points) {
-      if (point.flowRate <= targetQ) {
-        lower1000 = point;
-      } else {
-        higher1000 = point;
-        break;
+      let lower = null;
+      let higher = null;
+
+      for (const point of points) {
+        if (point.flowRate <= targetQ) {
+          lower = point;
+        } else {
+          higher = point;
+          break;
+        }
+      }
+
+      if (!higher) higher = points[points.length - 1];
+      if (lower && higher) {
+        closestPoints[rpm] = { lower, higher };
       }
     }
 
-    // البحث في RPM 1200
-    for (const point of rpm1200Points) {
-      if (point.flowRate <= targetQ) {
-        lower1200 = point;
-      } else {
-        higher1200 = point;
-        break;
-      }
-    }
-
-    // إذا لم نجد نقطة أعلى، نستخدم أقصى قيمة
-    if (!higher1000) higher1000 = rpm1000Points[rpm1000Points.length - 1];
-    if (!higher1200) higher1200 = rpm1200Points[rpm1200Points.length - 1];
-
-    console.log('Initial points found:', {
-      rpm1000: { lower: lower1000, higher: higher1000 },
-      rpm1200: { lower: lower1200, higher: higher1200 }
-    });
-
-    // اختيار النقاط بناءً على الضغط الكلي
-    let finalLower = null;
-    let finalHigher = null;
-
-    // البحث عن النقاط الأقرب لمعدل التدفق المستهدف
-    const allPoints = [...rpm1000Points, ...rpm1200Points];
-    let validPointPairs = [];
+    console.log('Initial points found:', closestPoints);
 
     // البحث عن أزواج النقاط التي تحقق الشروط
+    let validPointPairs = [];
+    const allPoints = Object.values(closestPoints)
+      .flatMap(pair => [pair.lower, pair.higher])
+      .filter(point => point !== null);
+
+    if (allPoints.length < 2) {
+      // إذا لم نجد نقاط كافية، نستخدم جميع النقاط المتاحة
+      const allAvailablePoints = vetd630Data.filter(point => 
+        point.flowRate > 0 && point.totalPressure > 0
+      );
+      
+      // ترتيب النقاط حسب القرب من النقطة المستهدفة
+      const sortedPoints = allAvailablePoints.sort((a, b) => {
+        const diffA = Math.abs(a.flowRate - targetQ) + Math.abs(a.totalPressure - targetTotalPressure);
+        const diffB = Math.abs(b.flowRate - targetQ) + Math.abs(b.totalPressure - targetTotalPressure);
+        return diffA - diffB;
+      });
+
+      return [sortedPoints[0], sortedPoints[1]];
+    }
+
     for (let i = 0; i < allPoints.length; i++) {
       for (let j = i + 1; j < allPoints.length; j++) {
         const point1 = allPoints[i];
         const point2 = allPoints[j];
+        
+        if (!point1 || !point2) continue;
         
         // التحقق من أن معدل التدفق المستهدف يقع بين النقطتين
         const minFlowRate = Math.min(point1.flowRate, point2.flowRate);
@@ -184,11 +198,14 @@ const FlowCalculator = () => {
         const isPressureInRange = targetTotalPressure >= minPressure && targetTotalPressure <= maxPressure;
 
         if (isFlowRateInRange && isPressureInRange) {
-          // حساب مجموع الفروق في معدل التدفق
+          // حساب مجموع الفروق في معدل التدفق والضغط
           const flowRateDiff = Math.abs(point1.flowRate - targetQ) + Math.abs(point2.flowRate - targetQ);
+          const pressureDiff = Math.abs(point1.totalPressure - targetTotalPressure) + Math.abs(point2.totalPressure - targetTotalPressure);
+          const totalDiff = flowRateDiff + pressureDiff;
+          
           validPointPairs.push({
             points: [point1, point2],
-            flowRateDiff
+            totalDiff
           });
         }
       }
@@ -197,32 +214,34 @@ const FlowCalculator = () => {
     console.log('Valid point pairs:', validPointPairs);
 
     if (validPointPairs.length > 0) {
-      // اختيار الزوج الذي له أقل فرق في معدل التدفق
-      validPointPairs.sort((a, b) => a.flowRateDiff - b.flowRateDiff);
+      // اختيار الزوج الذي له أقل فرق في معدل التدفق والضغط
+      validPointPairs.sort((a, b) => a.totalDiff - b.totalDiff);
       const selectedPair = validPointPairs[0].points;
 
       // ترتيب النقاط بحيث تكون النقطة الأولى هي الأقل ضغطاً
-      finalLower = selectedPair[0].totalPressure < selectedPair[1].totalPressure ? selectedPair[0] : selectedPair[1];
-      finalHigher = selectedPair[0].totalPressure < selectedPair[1].totalPressure ? selectedPair[1] : selectedPair[0];
-    } else {
-      // إذا لم نجد نقاط في النطاق، نختار النقاط الأقرب
-      const pointsSortedByFlowRate = allPoints.sort((a, b) => 
-        Math.abs(a.flowRate - targetQ) - Math.abs(b.flowRate - targetQ)
-      );
-      finalLower = pointsSortedByFlowRate[0];
-      finalHigher = pointsSortedByFlowRate[1];
+      const finalLower = selectedPair[0].totalPressure < selectedPair[1].totalPressure ? selectedPair[0] : selectedPair[1];
+      const finalHigher = selectedPair[0].totalPressure < selectedPair[1].totalPressure ? selectedPair[1] : selectedPair[0];
+
+      console.log('Selected final points:', {
+        lower: finalLower,
+        higher: finalHigher,
+        lowerPressure: finalLower?.totalPressure,
+        higherPressure: finalHigher?.totalPressure,
+        lowerFlowRate: finalLower?.flowRate,
+        higherFlowRate: finalHigher?.flowRate
+      });
+
+      return [finalLower, finalHigher];
     }
 
-    console.log('Selected final points:', {
-      lower: finalLower,
-      higher: finalHigher,
-      lowerPressure: finalLower?.totalPressure,
-      higherPressure: finalHigher?.totalPressure,
-      lowerFlowRate: finalLower?.flowRate,
-      higherFlowRate: finalHigher?.flowRate
+    // إذا لم نجد نقاط في النطاق، نختار النقاط الأقرب
+    const pointsSortedByDiff = allPoints.sort((a, b) => {
+      const diffA = Math.abs(a.flowRate - targetQ) + Math.abs(a.totalPressure - targetTotalPressure);
+      const diffB = Math.abs(b.flowRate - targetQ) + Math.abs(b.totalPressure - targetTotalPressure);
+      return diffA - diffB;
     });
 
-    return [finalLower, finalHigher];
+    return [pointsSortedByDiff[0], pointsSortedByDiff[1]];
   };
 
   // الاستيفاء الخطي بين نقطتين
@@ -244,11 +263,43 @@ const FlowCalculator = () => {
     const q = parseFloat(qInput);
     const pStaticValue = parseFloat(pStatic);
 
+    if (isNaN(q) || isNaN(pStaticValue)) {
+      return;
+    }
+
+    // Check for negative static pressure
+    if (pStaticValue < 0) {
+      setIsPressureValid(false);
+      setStaticPressureRange({
+        min: 0,
+        max: calculateT(q),
+        T: calculateT(q),
+        dynamicPressure: 0.5 * 1.2 * Math.pow((4 * q) / (Math.PI * Math.pow(D, 2)), 2)
+      });
+      return;
+    }
+
     console.log('Input Values:', {
       diameter: D,
       flowRate: q,
       staticPressure: pStaticValue
     });
+
+    // Calculate T and validate pressure
+    const T = calculateT(q);
+    const dynamicPressure = 0.5 * 1.2 * Math.pow((4 * q) / (Math.PI * Math.pow(D, 2)), 2);
+    const totalPressure = pStaticValue + dynamicPressure;
+    const isValid = totalPressure <= T;
+
+    setIsPressureValid(isValid);
+    
+    if (!isValid) {
+      const range = calculateStaticPressureRange(q, totalPressure);
+      setStaticPressureRange(range);
+      return;
+    }
+
+    setStaticPressureRange(null);
 
     // الحسابات الأساسية
     const velocity = (4 * q) / (Math.PI * Math.pow(D, 2));
@@ -264,6 +315,11 @@ const FlowCalculator = () => {
     // البحث عن أقرب نقطتين مع مراعاة الضغط الكلي
     const [lowerPoint, higherPoint] = findClosestPoints(q, pTotal);
     
+    if (!lowerPoint || !higherPoint) {
+      console.error('Could not find valid points for interpolation');
+      return;
+    }
+
     console.log('Closest Points:', {
       lowerPoint,
       higherPoint
@@ -272,215 +328,371 @@ const FlowCalculator = () => {
     let efficiency = null;
     let rpm = null;
 
-    if (lowerPoint && higherPoint) {
-      // استيفاء الكفاءة
-      efficiency = interpolate(
-        q,
-        lowerPoint.flowRate,
-        lowerPoint.efficiency,
-        higherPoint.flowRate,
-        higherPoint.efficiency
+    // استيفاء الكفاءة
+    efficiency = interpolate(
+      q,
+      lowerPoint.flowRate,
+      lowerPoint.efficiency,
+      higherPoint.flowRate,
+      higherPoint.efficiency
+    );
+
+    // حساب Brake Power باستخدام المعادلة الصحيحة
+    const efficiencyDecimal = efficiency / 100;
+    const brakePower = (q * pTotal) / (efficiencyDecimal * 1000);
+
+    // حساب RPM باستخدام الاستيفاء
+    if (lowerPoint.rpm === higherPoint.rpm) {
+      rpm = lowerPoint.rpm;
+    } else {
+      // البحث عن النقاط المقابلة في RPM الأخرى
+      const otherRpmPoints = vetd630Data.filter(point => 
+        point.rpm !== lowerPoint.rpm && 
+        Math.abs(point.flowRate - q) <= 0.5
       );
 
-      // حساب Brake Power باستخدام المعادلة الصحيحة
-      const efficiencyDecimal = efficiency / 100; // تحويل الكفاءة من نسبة مئوية إلى عدد عشري
-      const brakePower = (q * pTotal) / (efficiencyDecimal * 1000);
+      if (otherRpmPoints.length > 0) {
+        const closestOtherPoint = otherRpmPoints.reduce((closest, current) => {
+          const currentDiff = Math.abs(current.flowRate - q);
+          const closestDiff = Math.abs(closest.flowRate - q);
+          return currentDiff < closestDiff ? current : closest;
+        });
 
-      console.log('Brake Power Calculation:', {
-        flowRate: q,
-        totalPressure: pTotal,
-        efficiency: efficiency,
-        efficiencyDecimal: efficiencyDecimal,
-        calculation: `(${q} × ${pTotal}) / (${efficiencyDecimal} × 1000)`,
-        brakePower: brakePower.toFixed(4)
-      });
-
-      // التحقق من تساوي RPM للنقطتين
-      if (lowerPoint.rpm === higherPoint.rpm) {
-        console.log('Both points have the same RPM:', lowerPoint.rpm);
-        rpm = lowerPoint.rpm;
-      } else {
-        // البحث عن النقاط المقابلة في RPM الأخرى
-        const otherRpmPoints = vetd630Data.filter(point => 
-          point.rpm !== lowerPoint.rpm && 
-          Math.abs(point.flowRate - q) <= 0.5
+        // استيفاء RPM بين النقطتين
+        rpm = interpolate(
+          pTotal,
+          lowerPoint.totalPressure,
+          lowerPoint.rpm,
+          closestOtherPoint.totalPressure,
+          closestOtherPoint.rpm
         );
-
-        console.log('Other RPM points:', otherRpmPoints);
-
-        if (otherRpmPoints.length > 0) {
-          const closestOtherPoint = otherRpmPoints.reduce((closest, current) => {
-            const currentDiff = Math.abs(current.flowRate - q);
-            const closestDiff = Math.abs(closest.flowRate - q);
-            return currentDiff < closestDiff ? current : closest;
-          });
-
-          console.log('Selected points for RPM calculation:', {
-            point1: {
-              flowRate: lowerPoint.flowRate,
-              rpm: lowerPoint.rpm,
-              totalPressure: lowerPoint.totalPressure
-            },
-            point2: {
-              flowRate: closestOtherPoint.flowRate,
-              rpm: closestOtherPoint.rpm,
-              totalPressure: closestOtherPoint.totalPressure
-            }
-          });
-
-          rpm = interpolate(
-            pTotal,
-            lowerPoint.totalPressure,
-            lowerPoint.rpm,
-            closestOtherPoint.totalPressure,
-            closestOtherPoint.rpm
-          );
-        } else {
-          rpm = lowerPoint.rpm;
-        }
+      } else {
+        rpm = lowerPoint.rpm;
       }
-
-      console.log('Interpolated Values:', {
-        efficiency: efficiency.toFixed(2),
-        rpm: rpm.toFixed(0),
-        brakePower: brakePower.toFixed(4)
-      });
-
-      setResults({
-        velocity: velocity.toFixed(2),
-        pDynamic: pDynamic.toFixed(2),
-        pTotal: pTotal.toFixed(2),
-        efficiency: efficiency.toFixed(2),
-        rpm: rpm.toFixed(0),
-        brakePower: brakePower.toFixed(4)
-      });
-
-      // إعداد بيانات الرسم البياني
-      const chartPoints = vetd630Data.map(point => ({
-        x: point.flowRate,
-        y: point.totalPressure
-      }));
-
-      // إعداد بيانات الرسم البياني للضغط
-      const rpm1000PressurePoints = vetd630Data
-        .filter(point => point.rpm === 1000)
-        .map(point => ({
-          x: point.flowRate,
-          y: point.totalPressure
-        }));
-
-      const rpm1200PressurePoints = vetd630Data
-        .filter(point => point.rpm === 1200)
-        .map(point => ({
-          x: point.flowRate,
-          y: point.totalPressure
-        }));
-
-      const pressureChartData = {
-        datasets: [
-          {
-            label: 'RPM 1000',
-            data: rpm1000PressurePoints,
-            borderColor: 'rgb(75, 192, 192)',
-            tension: 0.1
-          },
-          {
-            label: 'RPM 1200',
-            data: rpm1200PressurePoints,
-            borderColor: 'rgb(54, 162, 235)',
-            tension: 0.1
-          },
-          {
-            label: 'Current Point',
-            data: [{ x: q, y: pTotal }],
-            backgroundColor: 'rgb(255, 99, 132)',
-            pointRadius: 8
-          }
-        ]
-      };
-
-      // إعداد بيانات الرسم البياني للـ Brake Power
-      const rpm1000BrakePowerPoints = vetd630Data
-        .filter(point => point.rpm === 1000)
-        .map(point => ({
-          x: point.flowRate,
-          y: point.brakePower
-        }));
-
-      const rpm1200BrakePowerPoints = vetd630Data
-        .filter(point => point.rpm === 1200)
-        .map(point => ({
-          x: point.flowRate,
-          y: point.brakePower
-        }));
-
-      const brakePowerChartData = {
-        datasets: [
-          {
-            label: 'RPM 1000',
-            data: rpm1000BrakePowerPoints,
-            borderColor: 'rgb(153, 102, 255)',
-            tension: 0.1
-          },
-          {
-            label: 'RPM 1200',
-            data: rpm1200BrakePowerPoints,
-            borderColor: 'rgb(201, 203, 207)',
-            tension: 0.1
-          },
-          {
-            label: 'Current Point',
-            data: [{ x: q, y: brakePower }],
-            backgroundColor: 'rgb(255, 99, 132)',
-            pointRadius: 8
-          }
-        ]
-      };
-
-      // إعداد بيانات الرسم البياني للكفاءة
-      const rpm1000EfficiencyPoints = vetd630Data
-        .filter(point => point.rpm === 1000)
-        .map(point => ({
-          x: point.flowRate,
-          y: point.efficiency
-        }));
-
-      const rpm1200EfficiencyPoints = vetd630Data
-        .filter(point => point.rpm === 1200)
-        .map(point => ({
-          x: point.flowRate,
-          y: point.efficiency
-        }));
-
-      const efficiencyChartData = {
-        datasets: [
-          {
-            label: 'RPM 1000',
-            data: rpm1000EfficiencyPoints,
-            borderColor: 'rgb(255, 159, 64)',
-            tension: 0.1
-          },
-          {
-            label: 'RPM 1200',
-            data: rpm1200EfficiencyPoints,
-            borderColor: 'rgb(255, 99, 132)',
-            tension: 0.1
-          },
-          {
-            label: 'Current Point',
-            data: [{ x: q, y: efficiency }],
-            backgroundColor: 'rgb(75, 192, 192)',
-            pointRadius: 8
-          }
-        ]
-      };
-
-      setChartData({
-        pressure: pressureChartData,
-        brakePower: brakePowerChartData,
-        efficiency: efficiencyChartData
-      });
     }
+
+    setResults({
+      velocity: velocity.toFixed(2),
+      pDynamic: pDynamic.toFixed(2),
+      pTotal: pTotal.toFixed(2),
+      efficiency: efficiency.toFixed(2),
+      rpm: rpm.toFixed(0),
+      brakePower: brakePower.toFixed(4),
+      T: T.toFixed(2)
+    });
+
+
+    // إعداد بيانات الرسم البياني للضغط
+    const pressureChartData = {
+      datasets: [
+        {
+          label: 'RPM 900',
+          data: vetd630Data.filter(point => point.rpm === 900).map(point => ({
+            x: point.flowRate,
+            y: point.totalPressure
+          })),
+          borderColor: 'rgb(255, 99, 132)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 1000',
+          data: vetd630Data.filter(point => point.rpm === 1000).map(point => ({
+            x: point.flowRate,
+            y: point.totalPressure
+          })),
+          borderColor: 'rgb(75, 192, 192)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 1200',
+          data: vetd630Data.filter(point => point.rpm === 1200).map(point => ({
+            x: point.flowRate,
+            y: point.totalPressure
+          })),
+          borderColor: 'rgb(54, 162, 235)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 1400',
+          data: vetd630Data.filter(point => point.rpm === 1400).map(point => ({
+            x: point.flowRate,
+            y: point.totalPressure
+          })),
+          borderColor: 'rgb(153, 102, 255)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 1600',
+          data: vetd630Data.filter(point => point.rpm === 1600).map(point => ({
+            x: point.flowRate,
+            y: point.totalPressure
+          })),
+          borderColor: 'rgb(255, 159, 64)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 1800',
+          data: vetd630Data.filter(point => point.rpm === 1800).map(point => ({
+            x: point.flowRate,
+            y: point.totalPressure
+          })),
+          borderColor: 'rgb(201, 203, 207)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 2000',
+          data: vetd630Data.filter(point => point.rpm === 2000).map(point => ({
+            x: point.flowRate,
+            y: point.totalPressure
+          })),
+          borderColor: 'rgb(255, 99, 132)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 2200',
+          data: vetd630Data.filter(point => point.rpm === 2200).map(point => ({
+            x: point.flowRate,
+            y: point.totalPressure
+          })),
+          borderColor: 'rgb(75, 192, 192)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 2400',
+          data: vetd630Data.filter(point => point.rpm === 2400).map(point => ({
+            x: point.flowRate,
+            y: point.totalPressure
+          })),
+          borderColor: 'rgb(54, 162, 235)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 2850',
+          data: vetd630Data.filter(point => point.rpm === 2850).map(point => ({
+            x: point.flowRate,
+            y: point.totalPressure
+          })),
+          borderColor: 'rgb(153, 102, 255)',
+          tension: 0.1
+        },
+        {
+          label: 'Current Point',
+          data: [{ x: q, y: pTotal }],
+          backgroundColor: 'rgb(255, 99, 132)',
+          pointRadius: 8
+        }
+      ]
+    };
+
+    // إعداد بيانات الرسم البياني للـ Brake Power
+    const brakePowerChartData = {
+      datasets: [
+        {
+          label: 'RPM 900',
+          data: vetd630Data.filter(point => point.rpm === 900).map(point => ({
+            x: point.flowRate,
+            y: point.brakePower
+          })),
+          borderColor: 'rgb(255, 99, 132)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 1000',
+          data: vetd630Data.filter(point => point.rpm === 1000).map(point => ({
+            x: point.flowRate,
+            y: point.brakePower
+          })),
+          borderColor: 'rgb(75, 192, 192)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 1200',
+          data: vetd630Data.filter(point => point.rpm === 1200).map(point => ({
+            x: point.flowRate,
+            y: point.brakePower
+          })),
+          borderColor: 'rgb(54, 162, 235)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 1400',
+          data: vetd630Data.filter(point => point.rpm === 1400).map(point => ({
+            x: point.flowRate,
+            y: point.brakePower
+          })),
+          borderColor: 'rgb(153, 102, 255)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 1600',
+          data: vetd630Data.filter(point => point.rpm === 1600).map(point => ({
+            x: point.flowRate,
+            y: point.brakePower
+          })),
+          borderColor: 'rgb(255, 159, 64)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 1800',
+          data: vetd630Data.filter(point => point.rpm === 1800).map(point => ({
+            x: point.flowRate,
+            y: point.brakePower
+          })),
+          borderColor: 'rgb(201, 203, 207)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 2000',
+          data: vetd630Data.filter(point => point.rpm === 2000).map(point => ({
+            x: point.flowRate,
+            y: point.brakePower
+          })),
+          borderColor: 'rgb(255, 99, 132)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 2200',
+          data: vetd630Data.filter(point => point.rpm === 2200).map(point => ({
+            x: point.flowRate,
+            y: point.brakePower
+          })),
+          borderColor: 'rgb(75, 192, 192)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 2400',
+          data: vetd630Data.filter(point => point.rpm === 2400).map(point => ({
+            x: point.flowRate,
+            y: point.brakePower
+          })),
+          borderColor: 'rgb(54, 162, 235)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 2850',
+          data: vetd630Data.filter(point => point.rpm === 2850).map(point => ({
+            x: point.flowRate,
+            y: point.brakePower
+          })),
+          borderColor: 'rgb(153, 102, 255)',
+          tension: 0.1
+        },
+        {
+          label: 'Current Point',
+          data: [{ x: q, y: brakePower }],
+          backgroundColor: 'rgb(255, 99, 132)',
+          pointRadius: 8
+        }
+      ]
+    };
+
+    // إعداد بيانات الرسم البياني للكفاءة
+    const efficiencyChartData = {
+      datasets: [
+        {
+          label: 'RPM 900',
+          data: vetd630Data.filter(point => point.rpm === 900).map(point => ({
+            x: point.flowRate,
+            y: point.efficiency
+          })),
+          borderColor: 'rgb(255, 99, 132)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 1000',
+          data: vetd630Data.filter(point => point.rpm === 1000).map(point => ({
+            x: point.flowRate,
+            y: point.efficiency
+          })),
+          borderColor: 'rgb(75, 192, 192)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 1200',
+          data: vetd630Data.filter(point => point.rpm === 1200).map(point => ({
+            x: point.flowRate,
+            y: point.efficiency
+          })),
+          borderColor: 'rgb(54, 162, 235)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 1400',
+          data: vetd630Data.filter(point => point.rpm === 1400).map(point => ({
+            x: point.flowRate,
+            y: point.efficiency
+          })),
+          borderColor: 'rgb(153, 102, 255)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 1600',
+          data: vetd630Data.filter(point => point.rpm === 1600).map(point => ({
+            x: point.flowRate,
+            y: point.efficiency
+          })),
+          borderColor: 'rgb(255, 159, 64)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 1800',
+          data: vetd630Data.filter(point => point.rpm === 1800).map(point => ({
+            x: point.flowRate,
+            y: point.efficiency
+          })),
+          borderColor: 'rgb(201, 203, 207)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 2000',
+          data: vetd630Data.filter(point => point.rpm === 2000).map(point => ({
+            x: point.flowRate,
+            y: point.efficiency
+          })),
+          borderColor: 'rgb(255, 99, 132)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 2200',
+          data: vetd630Data.filter(point => point.rpm === 2200).map(point => ({
+            x: point.flowRate,
+            y: point.efficiency
+          })),
+          borderColor: 'rgb(75, 192, 192)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 2400',
+          data: vetd630Data.filter(point => point.rpm === 2400).map(point => ({
+            x: point.flowRate,
+            y: point.efficiency
+          })),
+          borderColor: 'rgb(54, 162, 235)',
+          tension: 0.1
+        },
+        {
+          label: 'RPM 2850',
+          data: vetd630Data.filter(point => point.rpm === 2850).map(point => ({
+            x: point.flowRate,
+            y: point.efficiency
+          })),
+          borderColor: 'rgb(153, 102, 255)',
+          tension: 0.1
+        },
+        {
+          label: 'Current Point',
+          data: [{ x: q, y: efficiency }],
+          backgroundColor: 'rgb(255, 99, 132)',
+          pointRadius: 8
+        }
+      ]
+    };
+
+    setChartData({
+      pressure: pressureChartData,
+      brakePower: brakePowerChartData,
+      efficiency: efficiencyChartData
+    });
   };
 
   return (
@@ -501,10 +713,19 @@ const FlowCalculator = () => {
           <label className="block mb-2">Static Pressure (Pa)</label>
           <input
             type="number"
+            min="0"
             value={pStatic}
             onChange={(e) => setPStatic(e.target.value)}
-            className="border p-2 w-full"
+            className={`border p-2 w-full ${!isPressureValid ? 'border-red-500' : ''}`}
           />
+          {!isPressureValid && staticPressureRange && (
+            <div className="text-red-500 mt-2">
+              <p>Static pressure is invalid. Valid range:</p>
+              <p>Minimum: {staticPressureRange.min.toFixed(2)} Pa</p>
+              <p>Maximum: {staticPressureRange.max.toFixed(2)} Pa</p>
+              
+            </div>
+          )}
         </div>
       </div>
 
