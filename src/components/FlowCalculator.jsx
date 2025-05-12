@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -8,9 +9,10 @@ import {
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 } from 'chart.js';
 import * as math from 'mathjs';
+import logo from '../assets/logo.png';
 
 // Register ChartJS components
 ChartJS.register(
@@ -93,6 +95,12 @@ const FlowCalculator = () => {
   const [chartData, setChartData] = useState(null);
   const [staticPressureRange, setStaticPressureRange] = useState(null);
   const [isPressureValid, setIsPressureValid] = useState(true);
+  const [isPStaticValid, setIsPStaticValid] = useState(true);
+  const [isQInputValid, setIsQInputValid] = useState(true);
+  const [validationError, setValidationError] = useState('');
+  const [fanType, setFanType] = useState('axial');
+  const [axialConfig, setAxialConfig] = useState('inline');
+  const [centrifugalInlet, setCentrifugalInlet] = useState('single');
 
   // Calculate T value based on flow rate
   const calculateT = (flowRate) => {
@@ -236,7 +244,115 @@ const FlowCalculator = () => {
     return result;
   };
 
+  const handleQInputChange = (e) => {
+    const value = e.target.value;
+    setQInput(value);
+    
+    if (value === '') {
+      setIsQInputValid(true);
+      return;
+    }
+
+    const q = parseFloat(value);
+    setIsQInputValid(q > 0 && q <= 10);
+
+    // Revalidate static pressure if it exists
+    if (pStatic) {
+      const pStaticValue = parseFloat(pStatic);
+      const T = calculateT(q);
+      const dynamicPressure = 0.5 * 1.2 * Math.pow((4 * q) / (Math.PI * Math.pow(0.63, 2)), 2);
+      const maxStaticPressure = T - dynamicPressure;
+
+      const isValid = pStaticValue >= 0 && pStaticValue <= maxStaticPressure;
+      setIsPStaticValid(isValid);
+
+      if (!isValid) {
+        setStaticPressureRange({
+          min: 0,
+          max: maxStaticPressure.toFixed(2),
+          T: T.toFixed(2),
+          dynamicPressure: dynamicPressure.toFixed(2)
+        });
+      } else {
+        setStaticPressureRange(null);
+      }
+    }
+  };
+
+  const handlePStaticChange = (e) => {
+    const value = e.target.value;
+    setPStatic(value);
+    
+    if (value === '') {
+      setIsPStaticValid(true);
+      setStaticPressureRange(null);
+      return;
+    }
+
+    const pStaticValue = parseFloat(value);
+    const q = parseFloat(qInput);
+
+    if (isNaN(q) || q <= 0) {
+      setIsPStaticValid(true);
+      setStaticPressureRange(null);
+      return;
+    }
+
+    const T = calculateT(q);
+    const dynamicPressure = 0.5 * 1.2 * Math.pow((4 * q) / (Math.PI * Math.pow(0.63, 2)), 2);
+    const maxStaticPressure = T - dynamicPressure;
+
+    const isValid = pStaticValue >= 0 && pStaticValue <= maxStaticPressure;
+    setIsPStaticValid(isValid);
+
+    if (!isValid) {
+      setStaticPressureRange({
+        min: 0,
+        max: maxStaticPressure.toFixed(2),
+        T: T.toFixed(2),
+        dynamicPressure: dynamicPressure.toFixed(2)
+      });
+    } else {
+      setStaticPressureRange(null);
+    }
+  };
+
+  const validateInputs = () => {
+    if (!qInput || !pStatic) {
+      setValidationError('Please fill in all fields');
+      return false;
+    }
+
+    const q = parseFloat(qInput);
+    if (isNaN(q) || q <= 0 || q > 10) {
+      setValidationError('Flow rate must be between 0 and 10 m³/sec');
+      return false;
+    }
+
+    const pStaticValue = parseFloat(pStatic);
+    const T = calculateT(q);
+    const dynamicPressure = 0.5 * 1.2 * Math.pow((4 * q) / (Math.PI * Math.pow(0.63, 2)), 2);
+    const maxStaticPressure = T - dynamicPressure;
+
+    if (pStaticValue < 0 || pStaticValue > maxStaticPressure) {
+      setValidationError(`Static pressure must be between 0 and ${maxStaticPressure.toFixed(2)} Pa for the given flow rate`);
+      setStaticPressureRange({
+        min: 0,
+        max: maxStaticPressure.toFixed(2),
+        T: T.toFixed(2),
+        dynamicPressure: dynamicPressure.toFixed(2)
+      });
+      return false;
+    }
+
+    setValidationError('');
+    return true;
+  };
+
   const calculateParameters = () => {
+    if (!validateInputs()) {
+      return;
+    }
     const D = 0.63;
     const q = parseFloat(qInput);
     const pStaticValue = parseFloat(pStatic);
@@ -436,21 +552,25 @@ const FlowCalculator = () => {
 
       // إعداد بيانات الرسم البياني للضغط
       const pressureChartData = {
+        labels: interpolationChartPoints.map(point => point.flowRate.toFixed(1)),
         datasets: [
           {
             label: 'Interpolated Points',
-            data: interpolationChartPoints.map(point => ({ x: point.flowRate, y: point.totalPressure })),
-            backgroundColor: 'rgba(54, 162, 235, 0.7)',
-            borderColor: 'rgba(54, 162, 235, 0.7)',
-            pointRadius: 6,
-            showLine: true,
-            fill: false,
+            data: interpolationChartPoints.map(point => point.totalPressure),
+            borderColor: '#72E5F2',
+            backgroundColor: '#2175BF',
+            tension: 0.4,
           },
           {
             label: 'Current Point',
             data: [{ x: q, y: pTotal }],
-            backgroundColor: 'rgb(255, 99, 132)',
-            pointRadius: 10,
+            borderColor: '#F21905',
+            backgroundColor: '#F21905',
+            pointRadius: 8,
+            pointHoverRadius: 12,
+            pointStyle: 'circle',
+            pointBorderWidth: 2,
+            pointBorderColor: '#fff',
             showLine: false,
           }
         ]
@@ -458,21 +578,25 @@ const FlowCalculator = () => {
 
       // إعداد بيانات الرسم البياني للـ Brake Power
       const brakePowerChartData = {
+        labels: interpolationChartPoints.map(point => point.flowRate.toFixed(1)),
         datasets: [
           {
             label: 'Interpolated Points',
-            data: interpolationChartPoints.map(point => ({ x: point.flowRate, y: point.brakePower })),
-            backgroundColor: 'rgba(54, 162, 235, 0.7)',
-            borderColor: 'rgba(54, 162, 235, 0.7)',
-            pointRadius: 6,
-            showLine: true,
-            fill: false,
+            data: interpolationChartPoints.map(point => point.brakePower),
+            borderColor: '#72E5F2',
+            backgroundColor: '#2175BF',
+            tension: 0.4,
           },
           {
             label: 'Current Point',
             data: [{ x: q, y: brakePower }],
-            backgroundColor: 'rgb(255, 99, 132)',
-            pointRadius: 10,
+            borderColor: '#F21905',
+            backgroundColor: '#F21905',
+            pointRadius: 8,
+            pointHoverRadius: 12,
+            pointStyle: 'circle',
+            pointBorderWidth: 2,
+            pointBorderColor: '#fff',
             showLine: false,
           }
         ]
@@ -480,20 +604,19 @@ const FlowCalculator = () => {
 
       // إعداد بيانات الرسم البياني للكفاءة
       const efficiencyChartData = {
+        labels: interpolationChartPoints.map(point => point.flowRate.toFixed(1)),
         datasets: [
           {
             label: 'Interpolated Points',
-            data: interpolationChartPoints.map(point => ({ x: point.flowRate, y: point.efficiency })),
-            backgroundColor: 'rgba(54, 162, 235, 0.7)',
-            borderColor: 'rgba(54, 162, 235, 0.7)',
-            pointRadius: 6,
-            showLine: true,
-            fill: false,
+            data: interpolationChartPoints.map(point => point.efficiency),
+            borderColor: '#72E5F2',
+            backgroundColor: '#2175BF',
+            tension: 0.4,
           },
           {
             label: 'Current Point',
             data: [{ x: q, y: efficiency }],
-            backgroundColor: 'rgb(255, 99, 132)',
+            borderColor: 'rgb(255, 99, 132)',
             pointRadius: 10,
             showLine: false,
           }
@@ -539,69 +662,273 @@ const FlowCalculator = () => {
     }
   };
 
+  const calculateFlow = () => {
+    // Implementation of calculateFlow function
+  };
+
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Flow Calculator</h1>
-      
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <label className="block mb-2">Flow Rate (m³/sec)</label>
-          <input
-            type="number"
-            value={qInput}
-            onChange={(e) => setQInput(e.target.value)}
-            className="border p-2 w-full"
-          />
-        </div>
-        <div>
-          <label className="block mb-2">Static Pressure (Pa)</label>
-          <input
-            type="number"
-            min="0"
-            value={pStatic}
-            onChange={(e) => setPStatic(e.target.value)}
-            className={`border p-2 w-full ${!isPressureValid ? 'border-red-500' : ''}`}
-          />
-          {!isPressureValid && staticPressureRange && (
-            <div className="text-red-500 mt-2">
-              <p>Static pressure is invalid. Valid range:</p>
-              <p>Minimum: {staticPressureRange.min.toFixed(2)} Pa</p>
-              <p>Maximum: {staticPressureRange.max.toFixed(2)} Pa</p>
-              
-            </div>
+    <div className="space-y-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="text-center"
+      >
+        <motion.div
+          initial={{ scale: 0.5 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="flex items-center justify-center mb-6"
+        >
+          <img src={logo} alt="Logo" className="w-48 h-[80px] md:w-64 md:h-[100px] object-contain" />
+        </motion.div>
+        <p className="text-white/80">Calculate flow rates and pressures for your system</p>
+      </motion.div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="space-y-6"
+        >
+          <div>
+            <label className="block text-[#72E5F2] text-sm font-semibold mb-2">
+              Flow Rate (m³/sec)
+            </label>
+            <input
+              type="number"
+              value={qInput}
+              onChange={handleQInputChange}
+              className={`w-full px-4 py-3 rounded-xl bg-white/5 border ${
+                isQInputValid ? 'border-white/10' : 'border-[#F21905]'
+              } text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#2175BF] focus:border-transparent transition-all`}
+              placeholder="Enter flow rate"
+              step="0.01"
+              min="0"
+              max="10"
+            />
+            {!isQInputValid && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-2 bg-[#F21905]/10 border border-[#F21905] rounded-xl p-3"
+              >
+                <div className="flex items-center space-x-2">
+                  <svg className="w-5 h-5 text-[#F21905]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-[#F21905] text-sm font-medium">
+                    Flow rate must be between 0 and 10 m³/sec
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-[#72E5F2] text-sm font-semibold mb-2">
+              Static Pressure (Pa)
+            </label>
+            <input
+              type="number"
+              value={pStatic}
+              onChange={handlePStaticChange}
+              className={`w-full px-4 py-3 rounded-xl bg-white/5 border ${
+                isPStaticValid ? 'border-white/10' : 'border-[#F21905]'
+              } text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#2175BF] focus:border-transparent transition-all`}
+              placeholder="Enter static pressure"
+              step="1"
+              min="0"
+            />
+            {!isPStaticValid && staticPressureRange && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-2 space-y-2 bg-[#F21905]/10 border border-[#F21905] rounded-xl p-3"
+              >
+                <div className="flex items-center space-x-2">
+                  <svg className="w-5 h-5 text-[#F21905]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-[#F21905] text-sm font-medium">
+                    Static pressure is out of range
+                  </p>
+                </div>
+                <div className="pl-7 space-y-1">
+                  <p className="text-[#F21905] text-sm">
+                    Maximum allowed value: {staticPressureRange.max} Pa
+                  </p>
+                  <div className="text-[#72E5F2] text-xs space-y-1">
+                    <p>Total Pressure (T): {staticPressureRange.T} Pa</p>
+                    <p>Dynamic Pressure: {staticPressureRange.dynamicPressure} Pa</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-[#72E5F2] text-sm font-semibold mb-2">
+              Select Fan Type
+            </label>
+            <select
+              value={fanType}
+              onChange={(e) => setFanType(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-[#2175BF] focus:border-transparent transition-all"
+            >
+              <option value="axial" className="bg-[#1a1a1a]">Axial</option>
+              <option value="centrifugal" className="bg-[#1a1a1a]">Centrifugal</option>
+            </select>
+          </div>
+
+          {fanType === 'axial' && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-[#72E5F2] text-sm font-semibold mb-2">
+                  Configuration
+                </label>
+                <select
+                  value={axialConfig}
+                  onChange={(e) => setAxialConfig(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-[#2175BF] focus:border-transparent transition-all"
+                >
+                  <option value="inline" className="bg-[#1a1a1a]">Inline/Wall-mounted</option>
+                  <option value="rooftop" className="bg-[#1a1a1a]">Rooftop/Box Inline</option>
+                  <option value="jet" className="bg-[#1a1a1a]">Jet Fan/Fire Rated</option>
+                </select>
+              </div>
+            </motion.div>
           )}
-        </div>
+
+          {fanType === 'centrifugal' && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-[#72E5F2] text-sm font-semibold mb-2">
+                  Inlet Type
+                </label>
+                <select
+                  value={centrifugalInlet}
+                  onChange={(e) => setCentrifugalInlet(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-[#2175BF] focus:border-transparent transition-all"
+                >
+                  <option value="single" className="bg-[#1a1a1a]">Single Inlet</option>
+                  <option value="double" className="bg-[#1a1a1a]">Double Inlet</option>
+                </select>
+              </div>
+            </motion.div>
+          )}
+
+          {validationError && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-[#F21905]/10 border border-[#F21905] rounded-xl p-3"
+            >
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-[#F21905]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-[#F21905] text-sm font-medium">
+                  {validationError}
+                </p>
+              </div>
+            </motion.div>
+          )}
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={calculateParameters}
+            className="w-full py-3 px-4 rounded-xl text-white font-semibold bg-[#2175BF] hover:bg-[#72E5F2] transition-colors duration-200 shadow-lg"
+          >
+            Calculate
+          </motion.button>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="space-y-6"
+        >
+          {results && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="bg-white/5 rounded-2xl p-6 border border-white/10"
+            >
+              <h2 className="text-xl font-semibold text-[#72E5F2] mb-4">Results</h2>
+              <div className="space-y-4">
+                {[
+                  { label: 'Velocity', value: `${results.velocity} m/s` },
+                  { label: 'Dynamic Pressure', value: `${results.pDynamic} Pa` },
+                  { label: 'Total Pressure', value: `${results.pTotal} Pa` },
+                  { label: 'Efficiency', value: `${results.efficiency}%` },
+                  { label: 'Brake Power', value: `${results.brakePower} kW` },
+                  { label: 'RPM', value: results.rpm },
+                  { label: 'Sound Pressure Level', value: `${results.lpa} dB` }
+                ].map((item, index) => (
+                  <motion.div
+                    key={item.label}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ 
+                      duration: 0.3, 
+                      delay: 0.4 + (index * 0.1),
+                      type: "spring",
+                      stiffness: 100
+                    }}
+                  >
+                    <p className="text-white/80">{item.label}:</p>
+                    <motion.p 
+                      initial={{ scale: 0.8 }}
+                      animate={{ scale: 1 }}
+                      transition={{ 
+                        duration: 0.3, 
+                        delay: 0.5 + (index * 0.1),
+                        type: "spring",
+                        stiffness: 200
+                      }}
+                      className="text-2xl font-bold text-white"
+                    >
+                      {item.value}
+                    </motion.p>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
       </div>
 
-      <button
-        onClick={calculateParameters}
-        className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
-      >
-        Calculate
-      </button>
-
       {results && (
-        <div className="mb-4">
-          <h2 className="text-xl font-bold mb-2">Results</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>Velocity: {results.velocity} m/s</div>
-            <div>Dynamic Pressure: {results.pDynamic} Pa</div>
-            <div>Total Pressure: {results.pTotal} Pa</div>
-            <div>Efficiency: {results.efficiency}%</div>
-            <div>Brake Power: {results.brakePower} kW</div>
-            <div className="col-span-2 font-semibold "> RPM: {results.rpm}</div>
-            <div className="col-span-2 font-semibold text-blue-600">Sound Pressure Level (Lpa): {results.lpa} dB</div>
-          </div>
-        </div>
-      )}
-
-      {chartData && (
-        <div className="space-y-8">
-          <div className="h-96">
-            <h3 className="text-lg font-semibold mb-2">Pressure vs Flow Rate</h3>
-            <Line
-              data={chartData.pressure}
-              options={{
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="space-y-8"
+        >
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
+            className="bg-white/5 rounded-2xl p-6 border border-white/10"
+          >
+            <h3 className="text-xl font-semibold text-[#72E5F2] mb-4">Pressure vs Flow Rate</h3>
+            <div className="h-96">
+              <Line data={chartData.pressure} options={{
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
@@ -609,25 +936,51 @@ const FlowCalculator = () => {
                     type: 'linear',
                     title: {
                       display: true,
-                      text: 'Flow Rate (m³/sec)'
+                      text: 'Flow Rate (m³/sec)',
+                      color: '#72E5F2'
+                    },
+                    grid: {
+                      color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                      color: '#72E5F2'
                     }
                   },
                   y: {
                     title: {
                       display: true,
-                      text: 'Total Pressure (Pa)'
+                      text: 'Total Pressure (Pa)',
+                      color: '#72E5F2'
+                    },
+                    grid: {
+                      color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                      color: '#72E5F2'
+                    }
+                  }
+                },
+                plugins: {
+                  legend: {
+                    position: 'top',
+                    labels: {
+                      color: '#72E5F2'
                     }
                   }
                 }
-              }}
-            />
-          </div>
+              }} />
+            </div>
+          </motion.div>
 
-          <div className="h-96">
-            <h3 className="text-lg font-semibold mb-2">Brake Power vs Flow Rate</h3>
-            <Line
-              data={chartData.brakePower}
-              options={{
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
+            className="bg-white/5 rounded-2xl p-6 border border-white/10"
+          >
+            <h3 className="text-xl font-semibold text-[#72E5F2] mb-4">Brake Power vs Flow Rate</h3>
+            <div className="h-96">
+              <Line data={chartData.brakePower} options={{
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
@@ -635,24 +988,45 @@ const FlowCalculator = () => {
                     type: 'linear',
                     title: {
                       display: true,
-                      text: 'Flow Rate (m³/sec)'
+                      text: 'Flow Rate (m³/sec)',
+                      color: '#72E5F2'
+                    },
+                    grid: {
+                      color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                      color: '#72E5F2'
                     }
                   },
                   y: {
                     title: {
                       display: true,
-                      text: 'Brake Power (kW)'
+                      text: 'Brake Power (kW)',
+                      color: '#72E5F2'
+                    },
+                    grid: {
+                      color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                      color: '#72E5F2'
+                    }
+                  }
+                },
+                plugins: {
+                  legend: {
+                    position: 'top',
+                    labels: {
+                      color: '#72E5F2'
                     }
                   }
                 }
-              }}
-            />
-          </div>
-        </div>
+              }} />
+            </div>
+          </motion.div>
+        </motion.div>
       )}
     </div>
   );
-
 };
 
 export default FlowCalculator; 
