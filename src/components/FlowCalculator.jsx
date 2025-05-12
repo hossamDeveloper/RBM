@@ -92,7 +92,20 @@ const FlowCalculator = () => {
   const [qInput, setQInput] = useState('');
   const [pStatic, setPStatic] = useState('');
   const [results, setResults] = useState(null);
-  const [chartData, setChartData] = useState(null);
+  const [chartData, setChartData] = useState({
+    pressure: {
+      labels: [],
+      datasets: []
+    },
+    brakePower: {
+      labels: [],
+      datasets: []
+    },
+    efficiency: {
+      labels: [],
+      datasets: []
+    }
+  });
   const [staticPressureRange, setStaticPressureRange] = useState(null);
   const [isPressureValid, setIsPressureValid] = useState(true);
   const [isPStaticValid, setIsPStaticValid] = useState(true);
@@ -101,6 +114,10 @@ const FlowCalculator = () => {
   const [fanType, setFanType] = useState('axial');
   const [axialConfig, setAxialConfig] = useState('inline');
   const [centrifugalInlet, setCentrifugalInlet] = useState('single');
+  const [quadraticCoefficients, setQuadraticCoefficients] = useState(null);
+  const [quadraticPoints, setQuadraticPoints] = useState(null);
+  const [brakePowerCoefficients, setBrakePowerCoefficients] = useState(null);
+  const [brakePowerQuadraticPoints, setBrakePowerQuadraticPoints] = useState(null);
 
   // Calculate T value based on flow rate
   const calculateT = (flowRate) => {
@@ -347,6 +364,135 @@ const FlowCalculator = () => {
 
     setValidationError('');
     return true;
+  };
+
+  // Calculate quadratic curve coefficients (y = ax² + bx + c)
+  const calculateQuadraticCoefficients = (points) => {
+    if (!points || points.length < 3) return null;
+    
+    // Extract first, middle, and last points
+    const firstPoint = points[0];
+    const middlePoint = points[Math.floor(points.length / 2)];
+    const lastPoint = points[points.length - 1];
+    
+    console.log('Points for quadratic fitting:', {
+      first: firstPoint,
+      middle: middlePoint,
+      last: lastPoint
+    });
+    
+    // Set up the system of equations
+    // For each point (x,y), we have: y = ax² + bx + c
+    const x1 = firstPoint.flowRate;
+    const y1 = firstPoint.totalPressure;
+    const x2 = middlePoint.flowRate;
+    const y2 = middlePoint.totalPressure;
+    const x3 = lastPoint.flowRate;
+    const y3 = lastPoint.totalPressure;
+    
+    // Create matrix A and vector b for the system Ax = b
+    const A = [
+      [x1*x1, x1, 1],
+      [x2*x2, x2, 1],
+      [x3*x3, x3, 1]
+    ];
+    
+    const bVector = [y1, y2, y3];
+    
+    try {
+      // Solve the system of equations using mathjs
+      const coeffs = math.lusolve(A, bVector);
+      const a = coeffs[0][0];
+      const b = coeffs[1][0];
+      const c = coeffs[2][0];
+      
+      console.log('Quadratic coefficients:', { a, b, c });
+      
+      return { a, b, c };
+    } catch (error) {
+      console.error('Error calculating quadratic coefficients:', error);
+      return null;
+    }
+  };
+  
+  // Generate points using the quadratic equation
+  const generateQuadraticPoints = (coeffs, minFlow, maxFlow, numPoints = 100) => {
+    if (!coeffs) return null;
+    
+    const { a, b, c } = coeffs;
+    const points = [];
+    const step = (maxFlow - minFlow) / (numPoints - 1);
+    
+    for (let i = 0; i < numPoints; i++) {
+      const flowRate = minFlow + i * step;
+      const totalPressure = a * flowRate * flowRate + b * flowRate + c;
+      points.push({
+        flowRate,
+        totalPressure
+      });
+    }
+    
+    // Log all generated points for the quadratic curve
+    console.log('All Quadratic Curve Points:', {
+      equation: `y = ${a.toFixed(4)}x² + ${b.toFixed(4)}x + ${c.toFixed(4)}`,
+      coefficients: { a, b, c },
+      pointCount: points.length,
+      flowRateRange: { min: minFlow, max: maxFlow },
+      points: points.map(p => ({ 
+        flowRate: p.flowRate.toFixed(4), 
+        totalPressure: p.totalPressure.toFixed(4) 
+      }))
+    });
+    
+    return points;
+  };
+
+  // Calculate quadratic curve coefficients for brake power (y = ax² + bx + c)
+  const calculateBrakePowerCoefficients = (points) => {
+    if (!points || points.length < 3) return null;
+    
+    // Extract first, middle, and last points
+    const firstPoint = points[0];
+    const middlePoint = points[Math.floor(points.length / 2)];
+    const lastPoint = points[points.length - 1];
+    
+    console.log('Points for brake power quadratic fitting:', {
+      first: firstPoint,
+      middle: middlePoint,
+      last: lastPoint
+    });
+    
+    // Set up the system of equations
+    const x1 = firstPoint.flowRate;
+    const y1 = firstPoint.brakePower;
+    const x2 = middlePoint.flowRate;
+    const y2 = middlePoint.brakePower;
+    const x3 = lastPoint.flowRate;
+    const y3 = lastPoint.brakePower;
+    
+    // Create matrix A and vector b for the system Ax = b
+    const A = [
+      [x1*x1, x1, 1],
+      [x2*x2, x2, 1],
+      [x3*x3, x3, 1]
+    ];
+    
+    const bVector = [y1, y2, y3];
+    
+    try {
+      // Solve the system of equations using mathjs
+      const coeffs = math.lusolve(A, bVector);
+      const a = coeffs[0][0];
+      const b = coeffs[1][0];
+      const c = coeffs[2][0];
+      
+      console.log('Brake Power Quadratic coefficients:', { a, b, c });
+      
+      return { a, b, c };
+    } catch (error) {
+      console.error('Error calculating brake power quadratic coefficients:', error);
+      return null;
+    }
   };
 
   const calculateParameters = () => {
@@ -659,6 +805,393 @@ const FlowCalculator = () => {
         usedRpms,
         pairs: interpolatedPairs
       });
+      
+      // Extract interpolated points for quadratic fitting
+      const interpolatedPoints = interpolatedPairs.map(pair => pair.interpolated);
+      
+      // Calculate quadratic coefficients
+      const coeffs = calculateQuadraticCoefficients(interpolatedPoints);
+      setQuadraticCoefficients(coeffs);
+      
+      if (coeffs) {
+        // Generate points using the quadratic equation
+        const minFlow = interpolatedPoints[0].flowRate;
+        const maxFlow = interpolatedPoints[interpolatedPoints.length - 1].flowRate;
+        const quadPoints = generateQuadraticPoints(coeffs, minFlow, maxFlow);
+        setQuadraticPoints(quadPoints);
+        
+        // Log comparison between original interpolated points and quadratic curve
+        console.log('Comparison - Interpolated vs Quadratic:', 
+          interpolatedPoints.map(point => {
+            const flowRate = point.flowRate;
+            const originalPressure = point.totalPressure;
+            const quadraticPressure = coeffs.a * flowRate * flowRate + coeffs.b * flowRate + coeffs.c;
+            const difference = quadraticPressure - originalPressure;
+            const percentageDiff = (difference / originalPressure) * 100;
+            
+            return {
+              flowRate: flowRate.toFixed(4),
+              originalPressure: originalPressure.toFixed(4),
+              quadraticPressure: quadraticPressure.toFixed(4),
+              difference: difference.toFixed(4),
+              percentageDiff: percentageDiff.toFixed(2) + '%'
+            };
+          })
+        );
+        
+        // Create updated chart data with the quadratic curve
+        let updatedPressureChartData = null;
+        if (chartData && chartData.pressure) {
+          updatedPressureChartData = {
+            labels: rpmPoints.map(point => point.flowRate.toFixed(2)),
+            datasets: [
+              {
+                label: 'Quadratic Curve (y = ax² + bx + c)',
+                data: quadPoints.map(point => ({
+                  x: point.flowRate,
+                  y: point.totalPressure
+                })),
+                borderColor: '#F2C94C',
+                backgroundColor: 'rgba(242, 201, 76, 0.2)',
+                tension: 0,
+                borderWidth: 2,
+                pointRadius: 0,  // Hide individual points
+                pointHoverRadius: 0,  // Hide hover effect
+                fill: false,  // Don't fill area under the curve
+              },
+              {
+                label: 'RPM Data Points',
+                data: rpmPoints.map(point => ({
+                  x: point.flowRate,
+                  y: point.totalPressure
+                })),
+                borderColor: '#72E5F2',
+                backgroundColor: '#2175BF',
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                showLine: false
+              },
+              {
+                label: 'Current Point',
+                data: [{ x: q, y: pTotal }],
+                borderColor: '#F21905',
+                backgroundColor: '#F21905',
+                pointRadius: 8,
+                pointHoverRadius: 12,
+                pointStyle: 'circle',
+                pointBorderWidth: 2,
+                pointBorderColor: '#fff',
+                showLine: false,
+              }
+            ]
+          };
+        }
+        
+        // Also calculate brake power quadratic coefficients
+        const bpCoeffs = calculateBrakePowerCoefficients(rpmPoints);
+        setBrakePowerCoefficients(bpCoeffs);
+        
+        if (bpCoeffs) {
+          // Generate points for brake power quadratic curve
+          const bpFirstPoint = rpmPoints[0];
+          const bpLastPoint = rpmPoints[rpmPoints.length - 1];
+          const minFlow = bpFirstPoint.flowRate;
+          const maxFlow = bpLastPoint.flowRate;
+          const bpQuadPoints = [];
+          const step = (maxFlow - minFlow) / 100;
+          
+          for (let i = 0; i <= 100; i++) {
+            const flowRate = minFlow + i * step;
+            const brakePower = bpCoeffs.a * flowRate * flowRate + bpCoeffs.b * flowRate + bpCoeffs.c;
+            bpQuadPoints.push({
+              flowRate,
+              brakePower
+            });
+          }
+          
+          setBrakePowerQuadraticPoints(bpQuadPoints);
+          
+          // Log brake power quadratic points
+          console.log('Brake Power Quadratic Points:', {
+            equation: `y = ${bpCoeffs.a.toFixed(4)}x² + ${bpCoeffs.b.toFixed(4)}x + ${bpCoeffs.c.toFixed(4)}`,
+            points: bpQuadPoints.map(p => ({ 
+              flowRate: p.flowRate.toFixed(4), 
+              brakePower: p.brakePower.toFixed(4) 
+            }))
+          });
+          
+          // Update brake power chart with quadratic curve
+          let updatedBrakePowerChartData = null;
+          if (chartData && chartData.brakePower) {
+            updatedBrakePowerChartData = {
+              labels: rpmPoints.map(point => point.flowRate.toFixed(2)),
+              datasets: [
+                {
+                  label: 'Brake Power Quadratic Curve',
+                  data: bpQuadPoints.map(point => ({
+                    x: point.flowRate,
+                    y: point.brakePower
+                  })),
+                  borderColor: '#F2C94C',
+                  backgroundColor: 'rgba(242, 201, 76, 0.2)',
+                  tension: 0,
+                  borderWidth: 2,
+                  pointRadius: 0,
+                  pointHoverRadius: 0,
+                  fill: false,
+                },
+                {
+                  label: 'RPM Data Points',
+                  data: rpmPoints.map(point => ({
+                    x: point.flowRate,
+                    y: point.brakePower
+                  })),
+                  borderColor: '#72E5F2',
+                  backgroundColor: '#2175BF',
+                  pointRadius: 5,
+                  pointHoverRadius: 7,
+                  showLine: false
+                },
+                {
+                  label: 'Current Point',
+                  data: [{ x: q, y: brakePower }],
+                  borderColor: '#F21905',
+                  backgroundColor: '#F21905',
+                  pointRadius: 8,
+                  pointHoverRadius: 12,
+                  pointStyle: 'circle',
+                  pointBorderWidth: 2,
+                  pointBorderColor: '#fff',
+                  showLine: false,
+                }
+              ]
+            };
+          }
+          
+          // Update chart data with both pressure and brake power charts
+          const updatedChartData = { ...chartData };
+          if (updatedPressureChartData) {
+            updatedChartData.pressure = updatedPressureChartData;
+          }
+          if (updatedBrakePowerChartData) {
+            updatedChartData.brakePower = updatedBrakePowerChartData;
+          }
+          
+          setChartData(updatedChartData);
+        } else if (updatedPressureChartData) {
+          // If only pressure data is available, update just that
+          setChartData({
+            ...chartData,
+            pressure: updatedPressureChartData
+          });
+        }
+      }
+    }
+    
+    // Add direct calculation for single RPM data points
+    // This ensures we can calculate quadratic equation even when we have a single RPM group
+    const pointsForQuadratic = [];
+    
+    // If we have a single RPM group or if we want to use specific RPM data
+    const rpmToUse = usedRpms.length === 1 ? usedRpms[0] : rpmValue;
+    const rpmPoints = vetd630Data.filter(point => point.rpm === rpmToUse);
+    
+    if (rpmPoints.length >= 3) {
+      console.log(`Using ${rpmPoints.length} points from RPM ${rpmToUse} for quadratic fitting`);
+      
+      // Calculate quadratic coefficients using the first, middle, and last points
+      const firstPoint = rpmPoints[0];
+      const middlePoint = rpmPoints[Math.floor(rpmPoints.length / 2)];
+      const lastPoint = rpmPoints[rpmPoints.length - 1];
+      
+      console.log('Points for quadratic fitting:', {
+        first: firstPoint,
+        middle: middlePoint,
+        last: lastPoint
+      });
+      
+      // Set up the system of equations
+      const x1 = firstPoint.flowRate;
+      const y1 = firstPoint.totalPressure;
+      const x2 = middlePoint.flowRate;
+      const y2 = middlePoint.totalPressure;
+      const x3 = lastPoint.flowRate;
+      const y3 = lastPoint.totalPressure;
+      
+      // Create matrix A and vector b for the system Ax = b
+      const A = [
+        [x1*x1, x1, 1],
+        [x2*x2, x2, 1],
+        [x3*x3, x3, 1]
+      ];
+      
+      const bVector = [y1, y2, y3];
+      
+      try {
+        // Solve the system of equations using mathjs
+        const coeffs = math.lusolve(A, bVector);
+        const a = coeffs[0][0];
+        const b = coeffs[1][0];
+        const c = coeffs[2][0];
+        
+        console.log('Quadratic coefficients from RPM data:', { a, b, c });
+        setQuadraticCoefficients({ a, b, c });
+        
+        // Generate points using the quadratic equation
+        const minFlow = firstPoint.flowRate;
+        const maxFlow = lastPoint.flowRate;
+        const quadPoints = generateQuadraticPoints({ a, b, c }, minFlow, maxFlow);
+        setQuadraticPoints(quadPoints);
+        
+        // Create updated chart data with the quadratic curve
+        let updatedPressureChartData = null;
+        if (chartData && chartData.pressure) {
+          updatedPressureChartData = {
+            labels: rpmPoints.map(point => point.flowRate.toFixed(2)),
+            datasets: [
+              {
+                label: 'Pressure Quadratic Curve',
+                data: quadPoints.map(point => ({
+                  x: point.flowRate,
+                  y: point.totalPressure
+                })),
+                borderColor: '#F2C94C',
+                backgroundColor: 'rgba(242, 201, 76, 0.2)',
+                tension: 0,
+                borderWidth: 2,
+                pointRadius: 0,  // Hide individual points
+                pointHoverRadius: 0,  // Hide hover effect
+                fill: false,  // Don't fill area under the curve
+              },
+              {
+                label: 'RPM Data Points',
+                data: rpmPoints.map(point => ({
+                  x: point.flowRate,
+                  y: point.totalPressure
+                })),
+                borderColor: '#72E5F2',
+                backgroundColor: '#2175BF',
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                showLine: false
+              },
+              {
+                label: 'Current Point',
+                data: [{ x: q, y: pTotal }],
+                borderColor: '#F21905',
+                backgroundColor: '#F21905',
+                pointRadius: 8,
+                pointHoverRadius: 12,
+                pointStyle: 'circle',
+                pointBorderWidth: 2,
+                pointBorderColor: '#fff',
+                showLine: false,
+              }
+            ]
+          };
+        }
+        
+        // Also calculate brake power quadratic coefficients
+        const bpCoeffs = calculateBrakePowerCoefficients(rpmPoints);
+        setBrakePowerCoefficients(bpCoeffs);
+        
+        if (bpCoeffs) {
+          // Generate points for brake power quadratic curve
+          const bpFirstPoint = rpmPoints[0];
+          const bpLastPoint = rpmPoints[rpmPoints.length - 1];
+          const minFlow = bpFirstPoint.flowRate;
+          const maxFlow = bpLastPoint.flowRate;
+          const bpQuadPoints = [];
+          const step = (maxFlow - minFlow) / 100;
+          
+          for (let i = 0; i <= 100; i++) {
+            const flowRate = minFlow + i * step;
+            const brakePower = bpCoeffs.a * flowRate * flowRate + bpCoeffs.b * flowRate + bpCoeffs.c;
+            bpQuadPoints.push({
+              flowRate,
+              brakePower
+            });
+          }
+          
+          setBrakePowerQuadraticPoints(bpQuadPoints);
+          
+          // Log brake power quadratic points
+          console.log('Brake Power Quadratic Points:', {
+            equation: `y = ${bpCoeffs.a.toFixed(4)}x² + ${bpCoeffs.b.toFixed(4)}x + ${bpCoeffs.c.toFixed(4)}`,
+            points: bpQuadPoints.map(p => ({ 
+              flowRate: p.flowRate.toFixed(4), 
+              brakePower: p.brakePower.toFixed(4) 
+            }))
+          });
+          
+          // Update brake power chart with quadratic curve
+          let updatedBrakePowerChartData = null;
+          if (chartData && chartData.brakePower) {
+            updatedBrakePowerChartData = {
+              labels: rpmPoints.map(point => point.flowRate.toFixed(2)),
+              datasets: [
+                {
+                  label: 'Brake Power Quadratic Curve',
+                  data: bpQuadPoints.map(point => ({
+                    x: point.flowRate,
+                    y: point.brakePower
+                  })),
+                  borderColor: '#F2C94C',
+                  backgroundColor: 'rgba(242, 201, 76, 0.2)',
+                  tension: 0,
+                  borderWidth: 2,
+                  pointRadius: 0,
+                  pointHoverRadius: 0,
+                  fill: false,
+                },
+                {
+                  label: 'RPM Data Points',
+                  data: rpmPoints.map(point => ({
+                    x: point.flowRate,
+                    y: point.brakePower
+                  })),
+                  borderColor: '#72E5F2',
+                  backgroundColor: '#2175BF',
+                  pointRadius: 5,
+                  pointHoverRadius: 7,
+                  showLine: false
+                },
+                {
+                  label: 'Current Point',
+                  data: [{ x: q, y: brakePower }],
+                  borderColor: '#F21905',
+                  backgroundColor: '#F21905',
+                  pointRadius: 8,
+                  pointHoverRadius: 12,
+                  pointStyle: 'circle',
+                  pointBorderWidth: 2,
+                  pointBorderColor: '#fff',
+                  showLine: false,
+                }
+              ]
+            };
+          }
+          
+          // Update chart data with both pressure and brake power charts
+          const updatedChartData = { ...chartData };
+          if (updatedPressureChartData) {
+            updatedChartData.pressure = updatedPressureChartData;
+          }
+          if (updatedBrakePowerChartData) {
+            updatedChartData.brakePower = updatedBrakePowerChartData;
+          }
+          
+          setChartData(updatedChartData);
+        } else if (updatedPressureChartData) {
+          // If only pressure data is available, update just that
+          setChartData({
+            ...chartData,
+            pressure: updatedPressureChartData
+          });
+        }
+      } catch (error) {
+        console.error('Error calculating quadratic coefficients from RPM data:', error);
+      }
     }
   };
 
@@ -928,48 +1461,64 @@ const FlowCalculator = () => {
           >
             <h3 className="text-xl font-semibold text-[#72E5F2] mb-4">Pressure vs Flow Rate</h3>
             <div className="h-96">
-              <Line data={chartData.pressure} options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                  x: {
-                    type: 'linear',
-                    title: {
-                      display: true,
-                      text: 'Flow Rate (m³/sec)',
-                      color: '#72E5F2'
+              {chartData && chartData.pressure && chartData.pressure.datasets && (
+                <Line data={chartData.pressure} options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  scales: {
+                    x: {
+                      type: 'linear',
+                      title: {
+                        display: true,
+                        text: 'Flow Rate (m³/sec)',
+                        color: '#72E5F2'
+                      },
+                      grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                      },
+                      ticks: {
+                        color: '#72E5F2'
+                      }
                     },
-                    grid: {
-                      color: 'rgba(255, 255, 255, 0.1)'
-                    },
-                    ticks: {
-                      color: '#72E5F2'
+                    y: {
+                      title: {
+                        display: true,
+                        text: 'Total Pressure (Pa)',
+                        color: '#72E5F2'
+                      },
+                      grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                      },
+                      ticks: {
+                        color: '#72E5F2'
+                      }
                     }
                   },
-                  y: {
-                    title: {
-                      display: true,
-                      text: 'Total Pressure (Pa)',
-                      color: '#72E5F2'
-                    },
-                    grid: {
-                      color: 'rgba(255, 255, 255, 0.1)'
-                    },
-                    ticks: {
-                      color: '#72E5F2'
+                  plugins: {
+                    legend: {
+                      position: 'top',
+                      labels: {
+                        color: '#72E5F2'
+                      }
                     }
                   }
-                },
-                plugins: {
-                  legend: {
-                    position: 'top',
-                    labels: {
-                      color: '#72E5F2'
-                    }
-                  }
-                }
-              }} />
+                }} />
+              )}
             </div>
+            
+            {quadraticCoefficients && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="mt-4 p-4 bg-white/10 rounded-xl"
+              >
+                <h4 className="text-lg font-semibold text-[#72E5F2] mb-2">Pressure Quadratic Equation</h4>
+                <p className="text-white">
+                  Total Pressure = {quadraticCoefficients.a.toFixed(4)} × (Flow Rate)² + {quadraticCoefficients.b.toFixed(4)} × (Flow Rate) + {quadraticCoefficients.c.toFixed(4)}
+                </p>
+              </motion.div>
+            )}
           </motion.div>
 
           <motion.div 
@@ -980,48 +1529,64 @@ const FlowCalculator = () => {
           >
             <h3 className="text-xl font-semibold text-[#72E5F2] mb-4">Brake Power vs Flow Rate</h3>
             <div className="h-96">
-              <Line data={chartData.brakePower} options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                  x: {
-                    type: 'linear',
-                    title: {
-                      display: true,
-                      text: 'Flow Rate (m³/sec)',
-                      color: '#72E5F2'
+              {chartData && chartData.brakePower && chartData.brakePower.datasets && (
+                <Line data={chartData.brakePower} options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  scales: {
+                    x: {
+                      type: 'linear',
+                      title: {
+                        display: true,
+                        text: 'Flow Rate (m³/sec)',
+                        color: '#72E5F2'
+                      },
+                      grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                      },
+                      ticks: {
+                        color: '#72E5F2'
+                      }
                     },
-                    grid: {
-                      color: 'rgba(255, 255, 255, 0.1)'
-                    },
-                    ticks: {
-                      color: '#72E5F2'
+                    y: {
+                      title: {
+                        display: true,
+                        text: 'Brake Power (kW)',
+                        color: '#72E5F2'
+                      },
+                      grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                      },
+                      ticks: {
+                        color: '#72E5F2'
+                      }
                     }
                   },
-                  y: {
-                    title: {
-                      display: true,
-                      text: 'Brake Power (kW)',
-                      color: '#72E5F2'
-                    },
-                    grid: {
-                      color: 'rgba(255, 255, 255, 0.1)'
-                    },
-                    ticks: {
-                      color: '#72E5F2'
+                  plugins: {
+                    legend: {
+                      position: 'top',
+                      labels: {
+                        color: '#72E5F2'
+                      }
                     }
                   }
-                },
-                plugins: {
-                  legend: {
-                    position: 'top',
-                    labels: {
-                      color: '#72E5F2'
-                    }
-                  }
-                }
-              }} />
+                }} />
+              )}
             </div>
+            
+            {brakePowerCoefficients && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="mt-4 p-4 bg-white/10 rounded-xl"
+              >
+                <h4 className="text-lg font-semibold text-[#72E5F2] mb-2">Brake Power Quadratic Equation</h4>
+                <p className="text-white">
+                  Brake Power = {brakePowerCoefficients.a.toFixed(4)} × (Flow Rate)² + {brakePowerCoefficients.b.toFixed(4)} × (Flow Rate) + {brakePowerCoefficients.c.toFixed(4)}
+                </p>
+              </motion.div>
+            )}
           </motion.div>
         </motion.div>
       )}
