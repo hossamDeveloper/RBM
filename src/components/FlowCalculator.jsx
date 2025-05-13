@@ -1478,7 +1478,9 @@ const FlowCalculator = () => {
                       },
                       ticks: {
                         color: '#72E5F2'
-                      }
+                      },
+                      min: 0, // Start x-axis from zero
+                      beginAtZero: true // Ensure axis starts at zero
                     },
                     y: {
                       title: {
@@ -1491,7 +1493,9 @@ const FlowCalculator = () => {
                       },
                       ticks: {
                         color: '#72E5F2'
-                      }
+                      },
+                      min: 0, // Start y-axis from zero
+                      beginAtZero: true // Ensure axis starts at zero
                     }
                   },
                   plugins: {
@@ -1546,7 +1550,9 @@ const FlowCalculator = () => {
                       },
                       ticks: {
                         color: '#72E5F2'
-                      }
+                      },
+                      min: 0, // Start x-axis from zero
+                      beginAtZero: true // Ensure axis starts at zero
                     },
                     y: {
                       title: {
@@ -1559,7 +1565,9 @@ const FlowCalculator = () => {
                       },
                       ticks: {
                         color: '#72E5F2'
-                      }
+                      },
+                      min: 0, // Start y-axis from zero
+                      beginAtZero: true // Ensure axis starts at zero
                     }
                   },
                   plugins: {
