@@ -167,6 +167,88 @@ const FlowCalculator = () => {
         const point1 = allAvailablePoints[i];
         const point2 = allAvailablePoints[j];
         
+        // التحقق من أن النقطتين لهما RPM مختلفة
+        const hasDifferentRPM = point1.rpm !== point2.rpm;
+        
+        // التحقق من أن معدل التدفق المستهدف يقع بين النقطتين
+        const minFlowRate = Math.min(point1.flowRate, point2.flowRate);
+        const maxFlowRate = Math.max(point1.flowRate, point2.flowRate);
+        const isFlowRateInRange = targetQ >= minFlowRate && targetQ <= maxFlowRate;
+
+        // التحقق من أن الضغط الكلي المستهدف يقع بين النقطتين
+        const minPressure = Math.min(point1.totalPressure, point2.totalPressure);
+        const maxPressure = Math.max(point1.totalPressure, point2.totalPressure);
+        const isPressureInRange = targetTotalPressure >= minPressure && targetTotalPressure <= maxPressure;
+
+        if (hasDifferentRPM && isFlowRateInRange && isPressureInRange) {
+          // حساب نسبة الخطأ في معدل التدفق
+          const flowError1 = Math.abs((targetQ - point1.flowRate) / targetQ * 100);
+          const flowError2 = Math.abs((targetQ - point2.flowRate) / targetQ * 100);
+          const maxFlowError = Math.max(flowError1, flowError2);
+
+          // حساب نسبة الخطأ في الضغط الكلي
+          const pressureError1 = Math.abs((targetTotalPressure - point1.totalPressure) / targetTotalPressure * 100);
+          const pressureError2 = Math.abs((targetTotalPressure - point2.totalPressure) / targetTotalPressure * 100);
+          const maxPressureError = Math.max(pressureError1, pressureError2);
+
+          // مجموع نسبة الخطأ الكلي
+          const totalError = maxFlowError + maxPressureError;
+          
+          validPointPairs.push({
+            points: [point1, point2],
+            totalError,
+            flowError: maxFlowError,
+            pressureError: maxPressureError,
+            flowError1,
+            flowError2,
+            pressureError1,
+            pressureError2,
+            rpm1: point1.rpm,
+            rpm2: point2.rpm
+          });
+        }
+      }
+    }
+
+    console.log('Valid point pairs (with different RPMs):', validPointPairs);
+
+    if (validPointPairs.length > 0) {
+      // اختيار الزوج الذي له أقل نسبة خطأ
+      validPointPairs.sort((a, b) => a.totalError - b.totalError);
+      const selectedPair = validPointPairs[0].points;
+
+      // ترتيب النقاط بحيث تكون النقطة الأولى هي الأقل ضغطاً
+      const finalLower = selectedPair[0].totalPressure < selectedPair[1].totalPressure ? selectedPair[0] : selectedPair[1];
+      const finalHigher = selectedPair[0].totalPressure < selectedPair[1].totalPressure ? selectedPair[1] : selectedPair[0];
+
+      console.log('Selected final points (with different RPMs):', {
+        lower: finalLower,
+        higher: finalHigher,
+        lowerPressure: finalLower?.totalPressure,
+        higherPressure: finalHigher?.totalPressure,
+        lowerFlowRate: finalLower?.flowRate,
+        higherFlowRate: finalHigher?.flowRate,
+        lowerRPM: finalLower?.rpm,
+        higherRPM: finalHigher?.rpm,
+        flowError: validPointPairs[0].flowError,
+        pressureError: validPointPairs[0].pressureError,
+        totalError: validPointPairs[0].totalError,
+        flowError1: validPointPairs[0].flowError1,
+        flowError2: validPointPairs[0].flowError2,
+        pressureError1: validPointPairs[0].pressureError1,
+        pressureError2: validPointPairs[0].pressureError2
+      });
+
+      return [finalLower, finalHigher];
+    }
+
+    // إذا لم نجد نقاط ذات RPM مختلفة تحقق الشروط، نحاول البحث عن أي نقاط صالحة بدون شرط RPM المختلفة
+    let allValidPointPairs = [];
+    for (let i = 0; i < allAvailablePoints.length; i++) {
+      for (let j = i + 1; j < allAvailablePoints.length; j++) {
+        const point1 = allAvailablePoints[i];
+        const point2 = allAvailablePoints[j];
+        
         // التحقق من أن معدل التدفق المستهدف يقع بين النقطتين
         const minFlowRate = Math.min(point1.flowRate, point2.flowRate);
         const maxFlowRate = Math.max(point1.flowRate, point2.flowRate);
@@ -191,7 +273,7 @@ const FlowCalculator = () => {
           // مجموع نسبة الخطأ الكلي
           const totalError = maxFlowError + maxPressureError;
           
-          validPointPairs.push({
+          allValidPointPairs.push({
             points: [point1, point2],
             totalError,
             flowError: maxFlowError,
@@ -199,40 +281,41 @@ const FlowCalculator = () => {
             flowError1,
             flowError2,
             pressureError1,
-            pressureError2
+            pressureError2,
+            rpm1: point1.rpm,
+            rpm2: point2.rpm
           });
         }
       }
     }
 
-    console.log('Valid point pairs:', validPointPairs);
-
-    if (validPointPairs.length > 0) {
+    if (allValidPointPairs.length > 0) {
+      console.log('Falling back to any valid point pairs (same or different RPMs):', allValidPointPairs);
+      
       // اختيار الزوج الذي له أقل نسبة خطأ
-      validPointPairs.sort((a, b) => a.totalError - b.totalError);
-      const selectedPair = validPointPairs[0].points;
+      allValidPointPairs.sort((a, b) => a.totalError - b.totalError);
+      const selectedPair = allValidPointPairs[0].points;
 
       // ترتيب النقاط بحيث تكون النقطة الأولى هي الأقل ضغطاً
       const finalLower = selectedPair[0].totalPressure < selectedPair[1].totalPressure ? selectedPair[0] : selectedPair[1];
       const finalHigher = selectedPair[0].totalPressure < selectedPair[1].totalPressure ? selectedPair[1] : selectedPair[0];
 
-    console.log('Selected final points:', {
-      lower: finalLower,
-      higher: finalHigher,
-      lowerPressure: finalLower?.totalPressure,
-      higherPressure: finalHigher?.totalPressure,
-      lowerFlowRate: finalLower?.flowRate,
+      console.log('Selected fallback points:', {
+        lower: finalLower,
+        higher: finalHigher,
+        lowerPressure: finalLower?.totalPressure,
+        higherPressure: finalHigher?.totalPressure,
+        lowerFlowRate: finalLower?.flowRate,
         higherFlowRate: finalHigher?.flowRate,
-        flowError: validPointPairs[0].flowError,
-        pressureError: validPointPairs[0].pressureError,
-        totalError: validPointPairs[0].totalError,
-        flowError1: validPointPairs[0].flowError1,
-        flowError2: validPointPairs[0].flowError2,
-        pressureError1: validPointPairs[0].pressureError1,
-        pressureError2: validPointPairs[0].pressureError2
-    });
+        lowerRPM: finalLower?.rpm,
+        higherRPM: finalHigher?.rpm,
+        sameRPM: finalLower?.rpm === finalHigher?.rpm,
+        flowError: allValidPointPairs[0].flowError,
+        pressureError: allValidPointPairs[0].pressureError,
+        totalError: allValidPointPairs[0].totalError
+      });
 
-    return [finalLower, finalHigher];
+      return [finalLower, finalHigher];
     }
 
     // إذا لم نجد نقاط في النطاق، نختار النقاط الأقرب بناءً على نسبة الخطأ
@@ -244,7 +327,31 @@ const FlowCalculator = () => {
       return (flowErrorA + pressureErrorA) - (flowErrorB + pressureErrorB);
     });
 
-    return [pointsSortedByError[0], pointsSortedByError[1]];
+    console.log('No valid point pairs found, returning closest individual points');
+    
+    // Try to find two points with different RPMs
+    let point1 = pointsSortedByError[0];
+    let point2 = null;
+    
+    // Find the first point with a different RPM
+    for (let i = 1; i < pointsSortedByError.length; i++) {
+      if (pointsSortedByError[i].rpm !== point1.rpm) {
+        point2 = pointsSortedByError[i];
+        break;
+      }
+    }
+    
+    // If no point with different RPM is found, use the second closest point
+    if (!point2 && pointsSortedByError.length > 1) {
+      point2 = pointsSortedByError[1];
+    }
+    
+    // If we only have one point, duplicate it
+    if (!point2) {
+      point2 = point1;
+    }
+    
+    return [point1, point2];
   };
 
   // الاستيفاء الخطي بين نقطتين
@@ -839,6 +946,9 @@ const FlowCalculator = () => {
           })
         );
         
+        // Define rpmPoints before using it in chart data
+        const rpmPoints = interpolatedPoints;
+        
         // Create updated chart data with the quadratic curve
         let updatedPressureChartData = null;
         if (chartData && chartData.pressure) {
@@ -994,15 +1104,15 @@ const FlowCalculator = () => {
     
     // If we have a single RPM group or if we want to use specific RPM data
     const rpmToUse = usedRpms.length === 1 ? usedRpms[0] : rpmValue;
-    const rpmPoints = vetd630Data.filter(point => point.rpm === rpmToUse);
+    const rpmDataPoints = vetd630Data.filter(point => point.rpm === rpmToUse);
     
-    if (rpmPoints.length >= 3) {
-      console.log(`Using ${rpmPoints.length} points from RPM ${rpmToUse} for quadratic fitting`);
+    if (rpmDataPoints.length >= 3) {
+      console.log(`Using ${rpmDataPoints.length} points from RPM ${rpmToUse} for quadratic fitting`);
       
       // Calculate quadratic coefficients using the first, middle, and last points
-      const firstPoint = rpmPoints[0];
-      const middlePoint = rpmPoints[Math.floor(rpmPoints.length / 2)];
-      const lastPoint = rpmPoints[rpmPoints.length - 1];
+      const firstPoint = rpmDataPoints[0];
+      const middlePoint = rpmDataPoints[Math.floor(rpmDataPoints.length / 2)];
+      const lastPoint = rpmDataPoints[rpmDataPoints.length - 1];
       
       console.log('Points for quadratic fitting:', {
         first: firstPoint,
@@ -1047,7 +1157,7 @@ const FlowCalculator = () => {
         let updatedPressureChartData = null;
         if (chartData && chartData.pressure) {
           updatedPressureChartData = {
-            labels: rpmPoints.map(point => point.flowRate.toFixed(2)),
+            labels: rpmDataPoints.map(point => point.flowRate.toFixed(2)),
             datasets: [
               {
                 label: 'Pressure Quadratic Curve',
@@ -1065,7 +1175,7 @@ const FlowCalculator = () => {
               },
               {
                 label: 'RPM Data Points',
-                data: rpmPoints.map(point => ({
+                data: rpmDataPoints.map(point => ({
                   x: point.flowRate,
                   y: point.totalPressure
                 })),
@@ -1092,13 +1202,13 @@ const FlowCalculator = () => {
         }
         
         // Also calculate brake power quadratic coefficients
-        const bpCoeffs = calculateBrakePowerCoefficients(rpmPoints);
+        const bpCoeffs = calculateBrakePowerCoefficients(rpmDataPoints);
         setBrakePowerCoefficients(bpCoeffs);
         
         if (bpCoeffs) {
           // Generate points for brake power quadratic curve
-          const bpFirstPoint = rpmPoints[0];
-          const bpLastPoint = rpmPoints[rpmPoints.length - 1];
+          const bpFirstPoint = rpmDataPoints[0];
+          const bpLastPoint = rpmDataPoints[rpmDataPoints.length - 1];
           const minFlow = bpFirstPoint.flowRate;
           const maxFlow = bpLastPoint.flowRate;
           const bpQuadPoints = [];
@@ -1128,7 +1238,7 @@ const FlowCalculator = () => {
           let updatedBrakePowerChartData = null;
           if (chartData && chartData.brakePower) {
             updatedBrakePowerChartData = {
-              labels: rpmPoints.map(point => point.flowRate.toFixed(2)),
+              labels: rpmDataPoints.map(point => point.flowRate.toFixed(2)),
               datasets: [
                 {
                   label: 'Brake Power Quadratic Curve',
@@ -1146,7 +1256,7 @@ const FlowCalculator = () => {
                 },
                 {
                   label: 'RPM Data Points',
-                  data: rpmPoints.map(point => ({
+                  data: rpmDataPoints.map(point => ({
                     x: point.flowRate,
                     y: point.brakePower
                   })),
